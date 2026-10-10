@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Huellas del Valle · Citas</title>
+<style>
+  :root{--verde:#1f5c4a;--verde2:#e8f1ee;--gris:#5f6b68;--borde:#d5dedb;--ok:#1e7d4f;--alerta:#b7791f;--rech:#b42318;--resp:#4a5568}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f6f8f7;color:#1d2624}
+  header{background:var(--verde);color:#fff;padding:18px 16px}
+  header h1{margin:0;font-size:1.3rem}
+  header p{margin:4px 0 0;opacity:.85;font-size:.9rem}
+  nav{display:flex;gap:4px;padding:0 16px;background:#fff;border-bottom:1px solid var(--borde);overflow-x:auto}
+  nav button{border:0;background:none;padding:14px 12px;font-size:.95rem;cursor:pointer;color:var(--gris);border-bottom:3px solid transparent;white-space:nowrap}
+  nav button.activo{color:var(--verde);border-color:var(--verde);font-weight:600}
+  main{max-width:960px;margin:0 auto;padding:20px 16px}
+  .vista{display:none}.vista.activa{display:block}
+  .tarjeta{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:18px;margin-bottom:16px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:600px){.grid{grid-template-columns:1fr}}
+  label{display:block;font-size:.85rem;color:var(--gris);margin-bottom:4px}
+  input,select{width:100%;padding:9px 10px;border:1px solid var(--borde);border-radius:6px;font-size:.95rem;background:#fff}
+  .acciones{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .btn{background:var(--verde);color:#fff;border:0;border-radius:6px;padding:10px 16px;font-size:.95rem;cursor:pointer}
+  .btn:disabled{opacity:.6;cursor:wait}
+  .btn.sec{background:#fff;color:var(--verde);border:1px solid var(--verde)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .chips button{border:1px solid var(--borde);background:var(--verde2);border-radius:999px;padding:5px 11px;cursor:pointer;font-size:.82rem;color:#1d2624}
+  .chips button.sel{background:var(--verde);color:#fff;border-color:var(--verde)}
+  .resultado{border-radius:10px;padding:16px;color:#fff;margin-top:16px;display:none}
+  .resultado h3{margin:0 0 6px}.resultado p{margin:0}
+  .resultado small{display:block;margin-top:8px;opacity:.9}
+  .r-CONFIRMADA{background:var(--ok)}.r-CONFIRMADA_ALERTA{background:var(--alerta)}.r-RECHAZADA{background:var(--rech)}.r-RESPALDO,.r-ERROR{background:var(--resp)}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--borde);vertical-align:middle}
+  th{background:var(--verde2);color:var(--verde);font-weight:600}
+  .tabla-scroll{overflow-x:auto}
+  .chip{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.78rem;color:#fff;white-space:nowrap}
+  .fila-ctrl{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+  .fila-ctrl .campo{min-width:180px}
+  .vacio{color:var(--gris);padding:12px 0;margin:0}
+  .nota{font-size:.82rem;color:var(--gris)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+  @media(max-width:600px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:12px}
+  .kpi b{display:block;font-size:1.5rem;color:var(--verde)}
+  .kpi span{font-size:.8rem;color:var(--gris)}
+  .titulo-dia{margin:0 0 12px;font-size:1.05rem;color:var(--verde)}
+  .barra{height:10px;background:#edf2f0;border-radius:99px;overflow:hidden;min-width:90px}
+  .barra i{display:block;height:100%}
+  .franjas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+  .franja{border:1px solid var(--borde);border-radius:10px;padding:14px;background:#fff}
+  .franja h4{margin:0 0 6px;font-size:1.1rem}
+  .franja p{margin:6px 0 0;font-size:.85rem;color:var(--gris)}
+  .actualizado{font-size:.78rem;color:var(--gris);margin-left:auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>Clínica Veterinaria Huellas del Valle</h1>
+  <p>Sistema de agendamiento de citas · Cali</p>
+</header>
+<nav>
+  <button class="activo" data-vista="agendar">Agendar cita</button>
+  <button data-vista="agenda">Agenda del día</button>
+  <button data-vista="franjas">Franjas y cupos</button>
+</nav>
+
+<main>
+  <!-- VISTA 1: AGENDAR -->
+  <section id="agendar" class="vista activa">
+    <div class="tarjeta">
+      <form id="form">
+        <div class="grid">
+          <div><label for="propietario">Propietario</label><input id="propietario" name="propietario" required></div>
+          <div><label for="correo">Correo</label><input id="correo" name="correo" type="email" required></div>
+          <div><label for="mascota">Mascota</label><input id="mascota" name="mascota" required></div>
+          <div><label for="especie">Especie</label>
+            <select id="especie" name="especie"><option value="perro">Perro</option><option value="gato">Gato</option></select></div>
+          <div><label for="servicio">Servicio</label>
+            <select id="servicio" name="servicio">
+              <option>Consulta general</option><option>Vacunación</option><option>Baño</option><option>Ecografía</option>
+            </select></div>
+          <div><label for="fecha">Fecha</label><input id="fecha" name="fecha" type="date" required></div>
+          <div><label for="hora">Hora</label>
+            <select id="hora" name="hora">
+              <option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option>
+              <option>12:00</option><option>14:00</option><option>15:00</option><option>16:00</option>
+            </select></div>
+        </div>
+        <div class="acciones">
+          <button class="btn" type="submit" id="btnAgendar">Agendar</button>
+          <button class="btn sec" type="reset">Limpiar</button>
+        </div>
+      </form>
+      <p class="nota" style="margin-top:16px">Casos de prueba (solo llenan el formulario; se agenda con el botón):</p>
+      <div class="chips" id="casos"></div>
+    </div>
+    <div class="resultado" id="resultado"></div>
+  </section>
+
+  <!-- VISTA 2: AGENDA DEL DÍA -->
+  <section id="agenda" class="vista">
+    <div class="tarjeta">
+      <div class="fila-ctrl">
+        <div class="campo"><label for="fechaAgenda">Fecha</label><input id="fechaAgenda" type="date"></div>
+        <button class="btn sec" type="button" id="agHoy">Hoy</button>
+        <button class="btn sec" type="button" id="agManana">Mañana</button>
+        <button class="btn" type="button" id="agRecargar">↻ Actualizar</button>
+        <span class="actualizado" id="agActualizado"></span>
+      </div>
+      <p class="nota" style="margin:12px 0 0">Días con citas registradas:</p>
+      <div class="chips" id="agDias"></div>
+    </div>
+    <div class="kpis" id="agKpis"></div>
+    <div class="tarjeta" id="tablaAgenda"><p class="vacio">Cargando…</p></div>
+  </section>
+
+  <!-- VISTA 3: FRANJAS -->
+  <section id="franjas" class="vista">
+    <div class="tarjeta">
+      <div class="fila-ctrl">
+        <div class="campo"><label for="fechaFranja">Fecha</label><input id="fechaFranja" type="date"></div>
+        <button class="btn sec" type="button" id="frHoy">Hoy</button>
+        <button class="btn sec" type="button" id="frManana">Mañana</button>
+        <button class="btn" type="button" id="frRecargar">↻ Actualizar</button>
+        <span class="actualizado" id="frActualizado"></span>
+      </div>
+      <p class="nota" style="margin:12px 0 0">Días con franjas abiertas en la agenda:</p>
+      <div class="chips" id="frDias"></div>
+    </div>
+    <div class="tarjeta" id="tablaFranjas"><p class="vacio">Cargando…</p></div>
+  </section>
+</main>
+
+<script>
+// ---- Configuración ----
+const WEBHOOK_URL = "https://hook.us2.make.com/fjpunrmcxhs4mshi6dsbe52sfiirkuba";
+const SHEET_ID    = "11Gej1OlSEvbxG1UeKBGXiMBLA4dlg4LFJcEi_nzwu2A";
+
+// ---- Utilidades de fecha (zona local, formato AAAA-MM-DD) ----
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const hoy = () => iso(new Date());
+const manana = () => { const d = new Date(); d.setDate(d.getDate() + 1); return iso(d); };
+const DIAS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const fechaLarga = f => { const [a, m, d] = f.split("-").map(Number); const dt = new Date(a, m - 1, d); return `${DIAS[dt.getDay()]} ${d} de ${MESES[m - 1]} de ${a}`; };
+const fechaCorta = f => { const [, m, d] = f.split("-").map(Number); return `${d} ${MESES[m - 1].slice(0, 3)}`; };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// ---- Navegación (carga automática al abrir cada vista) ----
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("activo", x === b));
+  document.querySelectorAll(".vista").forEach(v => v.classList.toggle("activa", v.id === b.dataset.vista));
+  if (b.dataset.vista === "agenda") cargarAgenda(true);
+  if (b.dataset.vista === "franjas") cargarFranjas(true);
+});
+
+// ---- Casos de prueba del enunciado ----
+const CASOS = {
+  C1: {mascota:"Luna",  especie:"perro", servicio:"Consulta general", fecha:"2026-10-14", hora:"08:00"},
+  C2: {mascota:"Michi", especie:"gato",  servicio:"Vacunación",       fecha:"2026-10-14", hora:"10:00"},
+  C3: {mascota:"Rocky", especie:"perro", servicio:"Baño",             fecha:"2026-10-14", hora:"11:00"},
+  C4: {mascota:"Pelusa",especie:"gato",  servicio:"Consulta general", fecha:"2026-10-20", hora:"08:00"},
+  C5: {mascota:"Luna",  especie:"perro", servicio:"Baño",             fecha:"2026-10-14", hora:"09:00"},
+};
+Object.entries(CASOS).forEach(([k, c]) => {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.textContent = `${k} · ${c.mascota} ${c.hora}`;
+  b.onclick = () => {
+    for (const [campo, valor] of Object.entries(c)) document.getElementById(campo).value = valor;
+    if (!document.getElementById("propietario").value) document.getElementById("propietario").value = "Cristian Marin";
+    if (!document.getElementById("correo").value) document.getElementById("correo").value = "cm6562141@gmail.com";
+  };
+  document.getElementById("casos").appendChild(b);
+});
+
+// ---- Agendar: dispara el webhook del escenario 1 ----
+const TITULOS = {
+  CONFIRMADA: "✔ Cita confirmada",
+  CONFIRMADA_ALERTA: "⚠ Cita confirmada con alerta",
+  RECHAZADA: "✖ Cita rechazada",
+  RESPALDO: "↪ Ruta de respaldo",
+  ERROR: "Error"
+};
+document.getElementById("form").onsubmit = async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("btnAgendar");
+  const caja = document.getElementById("resultado");
+  btn.disabled = true; btn.textContent = "Procesando…";
+  const datos = new URLSearchParams(new FormData(e.target)); // form-urlencoded: sin preflight CORS
+  let r;
+  try {
+    const resp = await fetch(WEBHOOK_URL, { method: "POST", body: datos });
+    const texto = await resp.text();
+    try { r = JSON.parse(texto); }
+    catch { r = { resultado: "ERROR", mensaje: `Respuesta inesperada del proceso: «${texto}». ¿El escenario está activo?` }; }
+  } catch (err) {
+    r = { resultado: "ERROR", mensaje: "No se pudo contactar el proceso: " + err.message };
+  }
+  caja.className = "resultado r-" + (r.resultado || "ERROR");
+  caja.style.display = "block";
+  caja.innerHTML = `<h3>${TITULOS[r.resultado] || esc(r.resultado)}</h3><p>${esc(r.mensaje)}</p>` +
+    (r.libres !== undefined && r.libres !== null ? `<small>Cupos libres en la franja: ${esc(r.libres)}</small>` : "") +
+    (r.id_cita ? `<small>Código: ${esc(r.id_cita)}</small>` : "");
+  btn.disabled = false; btn.textContent = "Agendar";
+  // Lo agendado cambia la agenda y las franjas: se vuelven a leer al abrir esas vistas.
+  cache.citas = cache.agenda = null;
+  const fechaForm = document.getElementById("fecha").value;
+  if (fechaForm) { document.getElementById("fechaAgenda").value = fechaForm; document.getElementById("fechaFranja").value = fechaForm; }
+};
+
+// ---- Lectura de la hoja de Google (compartida como lector) ----
+function parseCSV(t) {
+  const filas = []; let fila = [], campo = "", q = false;
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i];
+    if (q) { if (ch === '"') { if (t[i+1] === '"') { campo += '"'; i++; } else q = false; } else campo += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === ",") { fila.push(campo); campo = ""; }
+    else if (ch === "\n") { fila.push(campo); filas.push(fila); fila = []; campo = ""; }
+    else if (ch !== "\r") campo += ch;
+  }
+  if (campo || fila.length) { fila.push(campo); filas.push(fila); }
+  const [enc = [], ...resto] = filas;
+  return resto.filter(f => f.some(x => x.trim())).map(f => Object.fromEntries(enc.map((h, i) => [h.trim(), (f[i] || "").trim()])));
+}
+const cache = { citas: null, agenda: null };
+async function leerHoja(nombre, forzar) {
+  if (cache[nombre] && !forzar) return cache[nombre];
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${nombre}&_=${Date.now()}`;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error("No se pudo leer la hoja. Verifica que esté compartida como «Cualquier persona con el enlace · Lector».");
+  cache[nombre] = parseCSV(await resp.text());
+  return cache[nombre];
+}
+const horaAhora = () => new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+const COLORES = {CONFIRMADA:"var(--ok)", CONFIRMADA_ALERTA:"var(--alerta)", AGENDADA:"var(--verde)", ATENDIDA:"var(--ok)", NO_ASISTIO:"var(--rech)", CANCELADA:"var(--resp)", SI:"var(--ok)", NO:"var(--resp)"};
+const ETIQUETAS = {CONFIRMADA_ALERTA:"CON ALERTA", NO_ASISTIO:"NO ASISTIÓ"};
+const chip = (v, color) => `<span class="chip" style="background:${color || COLORES[v] || "var(--resp)"}">${esc(ETIQUETAS[v] || v || "—")}</span>`;
+function pintarChipsDias(contId, fechas, conteo, seleccion, alElegir) {
+  const cont = document.getElementById(contId);
+  cont.innerHTML = fechas.length ? "" : '<span class="nota">Todavía no hay datos.</span>';
+  fechas.forEach(f => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = f === seleccion ? "sel" : "";
+    b.textContent = `${fechaCorta(f)} (${conteo[f]})`;
+    b.onclick = () => alElegir(f);
+    cont.appendChild(b);
+  });
+}
+
+// ---- Vista: Agenda del día ----
+const fechaAgenda = document.getElementById("fechaAgenda");
+fechaAgenda.value = hoy();
+fechaAgenda.onchange = () => cargarAgenda();
+document.getElementById("agHoy").onclick = () => { fechaAgenda.value = hoy(); cargarAgenda(); };
+document.getElementById("agManana").onclick = () => { fechaAgenda.value = manana(); cargarAgenda(); };
+document.getElementById("agRecargar").onclick = () => cargarAgenda(true);
+
+let agPrimera = false;
+async function cargarAgenda(forzar) {
+  const f = fechaAgenda.value;
+  const caja = document.getElementById("tablaAgenda");
+  const kpis = document.getElementById("agKpis");
+  caja.innerHTML = '<p class="vacio">Cargando…</p>';
+  try {
+    const todas = await leerHoja("citas", forzar);
+    document.getElementById("agActualizado").textContent = "Actualizado " + horaAhora();
+    const conteo = {};
+    todas.forEach(c => { if (c.fecha) conteo[c.fecha] = (conteo[c.fecha] || 0) + 1; });
+    pintarChipsDias("agDias", Object.keys(conteo).sort(), conteo, f, d => { fechaAgenda.value = d; cargarAgenda(); });
+
+    if (!agPrimera) { agPrimera = true;
+      const prox = Object.keys(conteo).sort().find(d => d >= f);
+      if (prox && !conteo[f]) { fechaAgenda.value = prox; return cargarAgenda(); } }
+    const citas = todas.filter(c => c.fecha === f).sort((a, b) => a.hora.localeCompare(b.hora));
+    const n = citas.length;
+    kpis.innerHTML = [
+      [n, "citas del día"],
+      [citas.filter(c => c.resultado === "CONFIRMADA").length, "confirmadas"],
+      [citas.filter(c => c.resultado === "CONFIRMADA_ALERTA").length, "con alerta de cupo"],
+      [citas.filter(c => c.recordatorio_enviado === "SI").length, "recordatorios enviados"],
+    ].map(([v, t]) => `<div class="kpi"><b>${v}</b><span>${t}</span></div>`).join("");
+
+    caja.innerHTML = `<h3 class="titulo-dia">${fechaLarga(f)}</h3>` + (n === 0
+      ? `<p class="vacio">No hay citas agendadas para este día. Elige otra fecha o uno de los días de arriba.</p>`
+      : `<div class="tabla-scroll"><table><thead><tr><th>Hora</th><th>Mascota</th><th>Servicio</th><th>Propietario</th><th>Resultado</th><th>Estado</th><th>Recordatorio</th></tr></thead><tbody>` +
+        citas.map(c => `<tr><td><b>${esc(c.hora)}</b></td><td>${esc(c.mascota)} <span class="nota">(${esc(c.especie)})</span></td><td>${esc(c.servicio)}</td><td>${esc(c.propietario)}<br><span class="nota">${esc(c.correo)}</span></td><td>${chip(c.resultado)}</td><td>${chip(c.estado)}</td><td>${chip(c.recordatorio_enviado === "SI" ? "SI" : "NO", null)}</td></tr>` +
+          (c.observacion && c.observacion !== "Sin novedad" ? `<tr><td></td><td colspan="6" class="nota">↳ ${esc(c.observacion)} · código ${esc(c.id_cita)}</td></tr>` : "")).join("") +
+        `</tbody></table></div>`);
+  } catch (e) { kpis.innerHTML = ""; caja.innerHTML = `<p class="vacio">${esc(e.message)}</p>`; }
+}
+
+// ---- Vista: Franjas y cupos ----
+const fechaFranja = document.getElementById("fechaFranja");
+fechaFranja.value = hoy();
+fechaFranja.onchange = () => cargarFranjas();
+document.getElementById("frHoy").onclick = () => { fechaFranja.value = hoy(); cargarFranjas(); };
+document.getElementById("frManana").onclick = () => { fechaFranja.value = manana(); cargarFranjas(); };
+document.getElementById("frRecargar").onclick = () => cargarFranjas(true);
+
+let frPrimera = false;
+async function cargarFranjas(forzar) {
+  const f = fechaFranja.value;
+  const caja = document.getElementById("tablaFranjas");
+  caja.innerHTML = '<p class="vacio">Cargando…</p>';
+  try {
+    const agenda = await leerHoja("agenda", forzar);
+    document.getElementById("frActualizado").textContent = "Actualizado " + horaAhora();
+    const conteo = {};
+    agenda.forEach(x => { if (x.fecha) conteo[x.fecha] = (conteo[x.fecha] || 0) + 1; });
+    pintarChipsDias("frDias", Object.keys(conteo).sort(), conteo, f, d => { fechaFranja.value = d; cargarFranjas(); });
+
+    if (!frPrimera) { frPrimera = true;
+      const prox = Object.keys(conteo).sort().find(d => d >= f);
+      if (prox && !conteo[f]) { fechaFranja.value = prox; return cargarFranjas(); } }
+    const fr = agenda.filter(x => x.fecha === f).sort((a, b) => a.hora.localeCompare(b.hora));
+    if (fr.length === 0) {
+      caja.innerHTML = `<h3 class="titulo-dia">${fechaLarga(f)}</h3><p class="vacio">No hay franjas abiertas en la agenda para este día. Una solicitud para esta fecha iría a la ruta de respaldo.</p>`;
+      return;
+    }
+    const totCupo = fr.reduce((s, x) => s + Number(x.cupo), 0);
+    const totOcup = fr.reduce((s, x) => s + Number(x.ocupados), 0);
+    caja.innerHTML = `<h3 class="titulo-dia">${fechaLarga(f)}</h3>
+      <p class="nota" style="margin:-6px 0 14px">Ocupación del día: <b>${totOcup} de ${totCupo}</b> cupos (${Math.round(totOcup / totCupo * 100)} %) · libres = cupo − ocupados</p>
+      <div class="franjas-grid">` + fr.map(x => {
+        const cupo = Number(x.cupo), ocup = Number(x.ocupados), libres = cupo - ocup;
+        const color = libres <= 0 ? "var(--rech)" : libres === 1 ? "var(--alerta)" : "var(--ok)";
+        const estado = libres <= 0 ? "LLENA" : libres === 1 ? "1 LIBRE" : `${libres} LIBRES`;
+        return `<div class="franja"><h4>${esc(x.hora)}</h4>${chip(estado, color)}
+          <div class="barra" style="margin-top:10px"><i style="width:${Math.min(100, ocup / cupo * 100)}%;background:${color}"></i></div>
+          <p>${ocup} ocupados de ${cupo} · ${libres <= 0 ? "se rechazan nuevas citas" : libres <= 2 ? "la próxima cita genera alerta" : "disponible"}</p></div>`;
+      }).join("") + `</div>`;
+  } catch (e) { caja.innerHTML = `<p class="vacio">${esc(e.message)}</p>`; }
+}
+</script>
+</body>
+</html>
