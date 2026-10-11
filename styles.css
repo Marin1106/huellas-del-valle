@@ -1,0 +1,50 @@
+/* Estilos · Sistema de agendamiento Huellas del Valle */
+:root{--verde:#1f5c4a;--verde2:#e8f1ee;--gris:#5f6b68;--borde:#d5dedb;--ok:#1e7d4f;--alerta:#b7791f;--rech:#b42318;--resp:#4a5568}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f6f8f7;color:#1d2624}
+header{background:var(--verde);color:#fff;padding:18px 16px}
+header h1{margin:0;font-size:1.3rem}
+header p{margin:4px 0 0;opacity:.85;font-size:.9rem}
+nav{display:flex;gap:4px;padding:0 16px;background:#fff;border-bottom:1px solid var(--borde);overflow-x:auto}
+nav button{border:0;background:none;padding:14px 12px;font-size:.95rem;cursor:pointer;color:var(--gris);border-bottom:3px solid transparent;white-space:nowrap}
+nav button.activo{color:var(--verde);border-color:var(--verde);font-weight:600}
+main{max-width:960px;margin:0 auto;padding:20px 16px}
+.vista{display:none}.vista.activa{display:block}
+.tarjeta{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:18px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+label{display:block;font-size:.85rem;color:var(--gris);margin-bottom:4px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--borde);border-radius:6px;font-size:.95rem;background:#fff}
+.acciones{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn{background:var(--verde);color:#fff;border:0;border-radius:6px;padding:10px 16px;font-size:.95rem;cursor:pointer}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn.sec{background:#fff;color:var(--verde);border:1px solid var(--verde)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chips button{border:1px solid var(--borde);background:var(--verde2);border-radius:999px;padding:5px 11px;cursor:pointer;font-size:.82rem;color:#1d2624}
+.chips button.sel{background:var(--verde);color:#fff;border-color:var(--verde)}
+.resultado{border-radius:10px;padding:16px;color:#fff;margin-top:16px;display:none}
+.resultado h3{margin:0 0 6px}.resultado p{margin:0}
+.resultado small{display:block;margin-top:8px;opacity:.9}
+.r-CONFIRMADA{background:var(--ok)}.r-CONFIRMADA_ALERTA{background:var(--alerta)}.r-RECHAZADA{background:var(--rech)}.r-RESPALDO,.r-ERROR{background:var(--resp)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--borde);vertical-align:middle}
+th{background:var(--verde2);color:var(--verde);font-weight:600}
+.tabla-scroll{overflow-x:auto}
+.chip{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.78rem;color:#fff;white-space:nowrap}
+.fila-ctrl{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.fila-ctrl .campo{min-width:180px}
+.vacio{color:var(--gris);padding:12px 0;margin:0}
+.nota{font-size:.82rem;color:var(--gris)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:600px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:12px}
+.kpi b{display:block;font-size:1.5rem;color:var(--verde)}
+.kpi span{font-size:.8rem;color:var(--gris)}
+.titulo-dia{margin:0 0 12px;font-size:1.05rem;color:var(--verde)}
+.barra{height:10px;background:#edf2f0;border-radius:99px;overflow:hidden;min-width:90px}
+.barra i{display:block;height:100%}
+.franjas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.franja{border:1px solid var(--borde);border-radius:10px;padding:14px;background:#fff}
+.franja h4{margin:0 0 6px;font-size:1.1rem}
+.franja p{margin:6px 0 0;font-size:.85rem;color:var(--gris)}
+.actualizado{font-size:.78rem;color:var(--gris);margin-left:auto}
